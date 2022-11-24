@@ -35,7 +35,7 @@ If seed data is provided (or you already created it), you can skip this step.
 -- so we can start with a fresh state.
 -- (RESTART IDENTITY resets the primary key)
 
-TRUNCATE TABLE accounts RESTART IDENTITY CASCADE; -- replace with your own table name.
+TRUNCATE TABLE accounts, posts RESTART IDENTITY; -- replace with your own table name.
 
 -- Below this line there should only be `INSERT` statements.
 -- Replace these statements with your own seed data.
