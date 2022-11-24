@@ -1,10 +1,6 @@
 require_relative "./lib/database_connection"
 require_relative "./lib/album_repository"
 require_relative "./lib/artist_repository"
-# We need to give the database name to the method `connect`.
-# DatabaseConnection.connect("music_library")
-
-# file: app.rb
 
 class Application
 
@@ -35,14 +31,14 @@ class Application
     @io.puts "2 - List all artists"
     @io.print "Enter your choice: "
 
-    choice = @io.gets.chomp.to_i
+    choice = @io.gets.chomp
 
     case choice
-    when 1
+    when "1"
       @album_repository.all.each do |album|
         @io.puts "#{album.id} - #{album.title}"
       end
-    when 2
+    when "2"
       @artist_repository.all.each do |artist|
         @io.puts "#{artist.id} - #{artist.name}"
       end

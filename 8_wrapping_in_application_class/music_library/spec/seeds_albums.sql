@@ -4,7 +4,8 @@
 -- so we can start with a fresh state.
 -- (RESTART IDENTITY resets the primary key)
 
-TRUNCATE TABLE artists RESTART IDENTITY;
+-- TRUNCATE TABLE artists RESTART IDENTITY;
+-- TRUNCATE TABLE albums RESTART IDENTITY;
 TRUNCATE TABLE albums RESTART IDENTITY;
 
 -- Below this line there should only be `INSERT` statements.
