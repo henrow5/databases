@@ -13,10 +13,10 @@ Otherwise, [follow this recipe to design and create the SQL schema for your tabl
 ```
 # EXAMPLE
 
-Table: students
+Table: posts
 
 Columns:
-id | name | cohort_name
+id | title | content | views | account_id 
 ```
 
 ## 2. Create Test SQL seeds
@@ -35,19 +35,19 @@ If seed data is provided (or you already created it), you can skip this step.
 -- so we can start with a fresh state.
 -- (RESTART IDENTITY resets the primary key)
 
-TRUNCATE TABLE students RESTART IDENTITY; -- replace with your own table name.
-
+TRUNCATE TABLE accounts RESTART IDENTITY CASCADE; -- replace with your own table name.
 -- Below this line there should only be `INSERT` statements.
 -- Replace these statements with your own seed data.
 
-INSERT INTO students (name, cohort_name) VALUES ('David', 'April 2022');
-INSERT INTO students (name, cohort_name) VALUES ('Anna', 'May 2022');
+INSERT INTO accounts (username, email_address) VALUES ('john1', 'john1@redmail.com');
+INSERT INTO posts (title, content, views, account_id) VALUES ('weather', 'it was sunny', '3', '1');
+INSERT INTO posts (title, content, views, account_id) VALUES ('dinner', 'it was delicious', '5', '1');
 ```
 
 Run this SQL file on the database to truncate (empty) the table, and insert the seed data. Be mindful of the fact any existing records in the table will be deleted.
 
 ```bash
-psql -h 127.0.0.1 your_database_name < seeds_{table_name}.sql
+psql -h 127.0.0.1 social_network_test < spec/seeds_posts.sql
 ```
 
 ## 3. Define the class names
@@ -56,16 +56,16 @@ Usually, the Model class name will be the capitalised table name (single instead
 
 ```ruby
 # EXAMPLE
-# Table name: students
+# Table name: posts
 
 # Model class
-# (in lib/student.rb)
-class Student
+# (in lib/post.rb)
+class Post
 end
 
 # Repository class
 # (in lib/student_repository.rb)
-class StudentRepository
+class PostRepository
 end
 ```
 
@@ -80,10 +80,10 @@ Define the attributes of your Model class. You can usually map the table columns
 # Model class
 # (in lib/student.rb)
 
-class Student
+class Post
 
   # Replace the attributes by your own columns.
-  attr_accessor :id, :name, :cohort_name
+  attr_accessor :id, :title, :content, :views, :account_id
 end
 
 # The keyword attr_accessor is a special Ruby feature
@@ -105,41 +105,46 @@ Using comments, define the method signatures (arguments and return value) and wh
 
 ```ruby
 # EXAMPLE
-# Table name: students
+# Table name: posts
 
 # Repository class
-# (in lib/student_repository.rb)
+# (in lib/post_repository.rb)
 
-class StudentRepository
+class PostRepository
 
   # Selecting all records
   # No arguments
   def all
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students;
+    # SELECT id, title, content, views, account_id FROM posts;
 
-    # Returns an array of Student objects.
+    # Returns an array of Post objects.
   end
 
   # Gets a single record by its ID
   # One argument: the id (number)
   def find(id)
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students WHERE id = $1;
+    # SELECT id, title, content, views, account_id FROM posts WHERE id = $1;
 
-    # Returns a single Student object.
+    # Returns a single Post object.
   end
 
-  # Add more methods below for each operation you'd like to implement.
+  def create(post)
+    # Executes the SQL query:
+    # INSERT INTO posts (title, content, views, account_id) VALUES($1, $2);
 
-  # def create(student)
-  # end
+    # Returns nothing (only creates the record)
+  end
 
-  # def update(student)
-  # end
+  # Deletes an account record 
+  # from given id
+  def delete(id)
+    # Executes the SQL query:
+    # DELETE FROM posts WHERE id = $1
 
-  # def delete(student)
-  # end
+    # Returns nothing (only deletes the record)
+  end
 end
 ```
 
@@ -152,35 +157,74 @@ These examples will later be encoded as RSpec tests.
 ```ruby
 # EXAMPLES
 
-# 1
-# Get all students
+# 1 Get all Posts
 
-repo = StudentRepository.new
+repo = PostRepository.new
+posts = repo.all
 
-students = repo.all
+posts.length # =>  2
+posts.first.title # => 'weather'
+posts.first.content # => 'it was sunny'
+posts.first.views # => '3'
+posts.first.account_id # => '1'
 
-students.length # =>  2
+# 2 Get a single post ('weather')
 
-students[0].id # =>  1
-students[0].name # =>  'David'
-students[0].cohort_name # =>  'April 2022'
+repo = PostRepository.new
+post = repo.find(1)
 
-students[1].id # =>  2
-students[1].name # =>  'Anna'
-students[1].cohort_name # =>  'May 2022'
+post.title # => 'weather'
+post.content # => 'it was sunny'
+post.views # => '3'
+post.account_id # => '1'
 
-# 2
-# Get a single student
+# 3 Get another post ('dinner')
 
-repo = StudentRepository.new
+repo = PostRepository.new
+post = repo.find(2)
 
-student = repo.find(1)
+post.title # => 'dinner'
+post.content # => 'it was delicious'
+post.views # => '5'
+post.account_id # => '1'
 
-student.id # =>  1
-student.name # =>  'David'
-student.cohort_name # =>  'April 2022'
+# 4 Create a new post
 
-# Add more examples for each method
+repo = PostRepository.new
+new_post = Post.new
+new_post.title = 'interview'
+new_post.content = 'got the job'
+new_post.views = '10'
+new_post.account_id = '1'
+
+repo.create(new_post)
+
+posts = repo.all
+last_post = posts.last
+last_post.title # => 'interview'
+last_post.content # => 'got the job'
+last_post.views # => '10'
+last_post.account_id # => '1'
+
+# 5 deletes post with id 1
+repo = PostRepository.new
+
+delete_id = 1
+
+repo.delete(delete_id)
+
+all_posts = repo.all
+all_posts.length # => 1
+all_posts.first.id # => '2'
+
+# 6 deletes the two posts
+repo = PostRepository.new
+
+repo.delete(1)
+repo.delete(2)
+
+all_posts = repo.all
+all_posts.length # => 0
 ```
 
 Encode this example as a test.

@@ -13,10 +13,10 @@ Otherwise, [follow this recipe to design and create the SQL schema for your tabl
 ```
 # EXAMPLE
 
-Table: students
+Table: accounts
 
 Columns:
-id | name | cohort_name
+id | username | email_address
 ```
 
 ## 2. Create Test SQL seeds
@@ -35,19 +35,19 @@ If seed data is provided (or you already created it), you can skip this step.
 -- so we can start with a fresh state.
 -- (RESTART IDENTITY resets the primary key)
 
-TRUNCATE TABLE students RESTART IDENTITY; -- replace with your own table name.
+TRUNCATE TABLE accounts RESTART IDENTITY CASCADE; -- replace with your own table name.
 
 -- Below this line there should only be `INSERT` statements.
 -- Replace these statements with your own seed data.
 
-INSERT INTO students (name, cohort_name) VALUES ('David', 'April 2022');
-INSERT INTO students (name, cohort_name) VALUES ('Anna', 'May 2022');
+INSERT INTO accounts (username, email_address) VALUES ('john1', 'john1@redmail.com');
+INSERT INTO accounts (username, email_address) VALUES ('matt3', 'matt3@bluemail.com');
 ```
 
 Run this SQL file on the database to truncate (empty) the table, and insert the seed data. Be mindful of the fact any existing records in the table will be deleted.
 
 ```bash
-psql -h 127.0.0.1 your_database_name < seeds_{table_name}.sql
+psql -h 127.0.0.1 social_network_test < seeds_accounts.sql
 ```
 
 ## 3. Define the class names
@@ -56,16 +56,16 @@ Usually, the Model class name will be the capitalised table name (single instead
 
 ```ruby
 # EXAMPLE
-# Table name: students
+# Table name: accounts
 
 # Model class
 # (in lib/student.rb)
-class Student
+class Account
 end
 
 # Repository class
 # (in lib/student_repository.rb)
-class StudentRepository
+class AccountRepository
 end
 ```
 
@@ -80,10 +80,10 @@ Define the attributes of your Model class. You can usually map the table columns
 # Model class
 # (in lib/student.rb)
 
-class Student
+class Account
 
   # Replace the attributes by your own columns.
-  attr_accessor :id, :name, :cohort_name
+  attr_accessor :id, :username, :email_address
 end
 
 # The keyword attr_accessor is a special Ruby feature
@@ -105,41 +105,46 @@ Using comments, define the method signatures (arguments and return value) and wh
 
 ```ruby
 # EXAMPLE
-# Table name: students
+# Table name: accounts
 
 # Repository class
-# (in lib/student_repository.rb)
+# (in lib/account_repository.rb)
 
-class StudentRepository
+class AccountRepository
 
   # Selecting all records
   # No arguments
   def all
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students;
+    # SELECT id, username, email_address FROM accounts;
 
-    # Returns an array of Student objects.
+    # Returns an array of Account objects.
   end
 
   # Gets a single record by its ID
   # One argument: the id (number)
   def find(id)
     # Executes the SQL query:
-    # SELECT id, name, cohort_name FROM students WHERE id = $1;
+    # SELECT id, username, email_address FROM accounts WHERE id = $1;
 
-    # Returns a single Student object.
+    # Returns a single Account object.
   end
 
-  # Add more methods below for each operation you'd like to implement.
+  def create(account)
+    # Executes the SQL query:
+    # INSERT INTO accounts (username, email_address) VALUES($1, $2);
 
-  # def create(student)
-  # end
+    # Returns nothing (only creates the record)
+  end
 
-  # def update(student)
-  # end
+  # Deletes an account record 
+  # from given id
+  def delete(id)
+    # Executes the SQL query:
+    # DELETE FROM accounts WHERE id = $1
 
-  # def delete(student)
-  # end
+    # Returns nothing (only deletes the record)
+  end
 end
 ```
 
@@ -152,35 +157,63 @@ These examples will later be encoded as RSpec tests.
 ```ruby
 # EXAMPLES
 
-# 1
-# Get all students
+# 1 Get all accounts
 
-repo = StudentRepository.new
+repo = AccountRepository.new
+accounts = repo.all
 
-students = repo.all
+accounts.length # =>  2
+accounts.first.id # => '1'
+accounts.first.username # = 'john1'
 
-students.length # =>  2
+# 2 Get a single account
 
-students[0].id # =>  1
-students[0].name # =>  'David'
-students[0].cohort_name # =>  'April 2022'
+repo = AccountRepository.new
+account = repo.find(1)
 
-students[1].id # =>  2
-students[1].name # =>  'Anna'
-students[1].cohort_name # =>  'May 2022'
+account.username # => 'john1'
+account.email_address # => 'john1@redmail.com'
 
-# 2
-# Get a single student
+# 3 Get another account
+repo = AccountRepository.new
+account = repo.find(2)
 
-repo = StudentRepository.new
+account.username # => 'matt3'
+account.email_address # => 'matt3@bluemail.com'
 
-student = repo.find(1)
+# 4 Create a new account
+repo = AccountRepository.new
 
-student.id # =>  1
-student.name # =>  'David'
-student.cohort_name # =>  'April 2022'
+new_account = Account.new
+new_account.username = 'richard5'
+new_account.email_address = 'richard5@orangemail.com'
 
-# Add more examples for each method
+repo.create(new_account)
+
+accounts = repo.all
+last_account = accounts.last
+last_account.username # => 'richard5'
+last_account.email_address # => 'richard5@orangemail.com'
+
+# 5 deletes account with id 1
+repo = AccountRepository.new
+
+delete_id = 1
+repo.delete(delete_id)
+
+all_accounts = repo.all
+all_accounts.length # => 1
+all_accounts.first.id # => '2'
+
+# 6 deletes the two accounts 
+repo = AccountRepository.new
+
+repo.delete(1)
+repo.delete(2)
+
+all_accounts = repo.all
+all_accounts.length # => 0
+
 ```
 
 Encode this example as a test.
