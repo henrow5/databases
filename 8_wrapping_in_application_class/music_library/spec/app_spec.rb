@@ -18,10 +18,10 @@ describe Application do
     expect(io).to receive(:puts).with("2 - List all artists")
     expect(io).to receive(:print).with("Enter your choice: ")
     expect(io).to receive(:gets).and_return("1")
-    expect(io).to receive(:puts).with("1 - Doolittle")
-    expect(io).to receive(:puts).with("2 - Surfer Rosa")
-    expect(io).to receive(:puts).with("3 - Waterloo")
-    expect(io).to receive(:puts).with("4 - Super Trouper")
+    expect(io).to receive(:puts).with("* 1 - Doolittle")
+    expect(io).to receive(:puts).with("* 2 - Surfer Rosa")
+    expect(io).to receive(:puts).with("* 3 - Waterloo")
+    expect(io).to receive(:puts).with("* 4 - Super Trouper")
 
     app1 = Application.new(
       "music_library_test",
@@ -39,10 +39,10 @@ describe Application do
     expect(io).to receive(:puts).with("2 - List all artists")
     expect(io).to receive(:print).with("Enter your choice: ")
     expect(io).to receive(:gets).and_return("2")
-    expect(io).to receive(:puts).with("1 - Pixies")
-    expect(io).to receive(:puts).with("2 - ABBA")
-    expect(io).to receive(:puts).with("3 - Taylor Swift")
-    expect(io).to receive(:puts).with("4 - Nina Simone")
+    expect(io).to receive(:puts).with("* 1 - Pixies")
+    expect(io).to receive(:puts).with("* 2 - ABBA")
+    expect(io).to receive(:puts).with("* 3 - Taylor Swift")
+    expect(io).to receive(:puts).with("* 4 - Nina Simone")
 
     app1 = Application.new(
       "music_library_test",

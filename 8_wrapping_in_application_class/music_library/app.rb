@@ -36,11 +36,11 @@ class Application
     case choice
     when "1"
       @album_repository.all.each do |album|
-        @io.puts "#{album.id} - #{album.title}"
+        @io.puts "* #{album.id} - #{album.title}"
       end
     when "2"
       @artist_repository.all.each do |artist|
-        @io.puts "#{artist.id} - #{artist.name}"
+        @io.puts "* #{artist.id} - #{artist.name}"
       end
     else
       @io.puts "Invalid choice"
