@@ -44,7 +44,8 @@ SELECT albums.id,
   FROM albums
     JOIN artists
     ON albums.artist_id = artists.id
-  WHERE artists.name = 'Pixies' AND albums.release_year = 1988;
+  WHERE artists.name = 'Pixies' 
+    AND albums.release_year = 1988;
 ```
 
 ## Challenge
@@ -67,5 +68,6 @@ SELECT albums.id AS album_id,
   FROM albums
     JOIN artists
     ON albums.artist_id = artists.id
-  WHERE artists.name = 'Nina Simone' AND albums.release_year > 1975;
+  WHERE artists.name = 'Nina Simone' 
+    AND albums.release_year > 1975;
 ```
